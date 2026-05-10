@@ -1,9 +1,7 @@
 import { useState, useEffect } from 'react';
+import { useParams, useNavigate } from 'react-router-dom';
 import { getPromises, getAssessments } from '../services/api';
 import styles from './PromiseDetail.module.css';
-
-// Epic 3 note: replace with useParams() from React Router
-// Epic 3 note: replace promiseId prop with route param
 
 const STATUS = {
   pending: { label: 'Active', color: '#4FC3F7', bg: 'rgba(79,195,247,0.10)' },
@@ -11,7 +9,9 @@ const STATUS = {
   BROKEN: { label: 'Broken', color: '#E05252', bg: 'rgba(224,82,82,0.10)' },
 };
 
-export default function PromiseDetail({ promiseId }) {
+export default function PromiseDetail() {
+  const { id } = useParams();
+  const navigate = useNavigate();
   const [promise, setPromise] = useState(null);
   const [assessments, setAssessments] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -26,7 +26,7 @@ export default function PromiseDetail({ promiseId }) {
           getAssessments(),
         ]);
 
-        const matched = allPromises.find((p) => p.id === promiseId);
+        const matched = allPromises.find((p) => p.id === id);
 
         if (!matched) {
           setNotFound(true);
@@ -34,7 +34,7 @@ export default function PromiseDetail({ promiseId }) {
         }
 
         const linkedAssessments = allAssessments.filter(
-          (a) => a.promiseId === promiseId
+          (a) => a.promiseId === id
         );
 
         setPromise(matched);
@@ -46,10 +46,8 @@ export default function PromiseDetail({ promiseId }) {
       }
     }
 
-    if (promiseId) {
-      fetchData();
-    }
-  }, [promiseId]);
+    fetchData();
+  }, [id]);
 
   if (loading) {
     return (
@@ -83,10 +81,7 @@ export default function PromiseDetail({ promiseId }) {
       ? `$${promise.stake.amount}`
       : 'Reputation';
 
-  const timelineDisplay =
-    status === 'pending'
-      ? '--' // Epic 3 stub: days remaining calculation pending clarification
-      : 'Closed';
+  const timelineDisplay = status === 'pending' ? '--' : 'Closed';
 
   const createdAtDisplay = new Date(promise.createdAt).toLocaleDateString(
     'en-US',
@@ -95,18 +90,14 @@ export default function PromiseDetail({ promiseId }) {
 
   return (
     <div className={styles.container}>
-      {/* Back navigation — Epic 3: replace with useNavigate() */}
       <button
         className={styles.backButton}
-        onClick={() =>
-          console.log('Navigate back to My Promises — wired in Epic 3')
-        }
+        onClick={() => navigate('/promises')}
       >
         ← Back to Promises
       </button>
 
       <div className={styles.content}>
-        {/* Promise Card */}
         <div className={styles.promiseCard}>
           <div className={styles.statusBar} style={{ background: cfg.color }} />
           <div className={styles.promiseCardBody}>
@@ -143,7 +134,6 @@ export default function PromiseDetail({ promiseId }) {
           </div>
         </div>
 
-        {/* Assessments Card */}
         <div className={styles.assessmentsCard}>
           <div className={styles.assessmentsHeader}>Assessments</div>
           {assessments.length === 0 ? (
@@ -176,7 +166,6 @@ export default function PromiseDetail({ promiseId }) {
           )}
         </div>
 
-        {/* Submit Assessment CTA — Epic 3: wire navigation to PP-012 */}
         {status === 'pending' && (
           <div className={styles.ctaCard}>
             <div>
@@ -187,9 +176,7 @@ export default function PromiseDetail({ promiseId }) {
             </div>
             <button
               className={styles.ctaButton}
-              onClick={() =>
-                console.log('Navigate to Submit Assessment — wired in Epic 3')
-              }
+              onClick={() => navigate('/create')}
             >
               Submit Assessment
             </button>
