@@ -1,5 +1,6 @@
 import { describe, test, expect, vi, beforeEach } from 'vitest';
 import { render, screen, waitFor } from '@testing-library/react';
+import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import PromiseDetail from './PromiseDetail';
 
 vi.mock('../services/api', () => ({
@@ -41,12 +42,22 @@ beforeEach(() => {
   vi.clearAllMocks();
 });
 
+function renderWithRouter(id) {
+  return render(
+    <MemoryRouter initialEntries={[`/promises/${id}`]}>
+      <Routes>
+        <Route path="/promises/:id" element={<PromiseDetail />} />
+      </Routes>
+    </MemoryRouter>
+  );
+}
+
 describe('PromiseDetail', () => {
   test('renders all promise fields correctly with mocked data', async () => {
     getPromises.mockResolvedValue([mockPendingPromise]);
     getAssessments.mockResolvedValue([]);
 
-    render(<PromiseDetail promiseId="prm_001" />);
+    renderWithRouter('prm_001');
 
     await waitFor(() => {
       expect(
@@ -64,7 +75,7 @@ describe('PromiseDetail', () => {
     getPromises.mockResolvedValue([mockPendingPromise]);
     getAssessments.mockResolvedValue([]);
 
-    render(<PromiseDetail promiseId="prm_001" />);
+    renderWithRouter('prm_001');
 
     await waitFor(() => {
       expect(screen.getByText('Submit Assessment')).toBeInTheDocument();
@@ -75,7 +86,7 @@ describe('PromiseDetail', () => {
     getPromises.mockResolvedValue([mockKeptPromise]);
     getAssessments.mockResolvedValue([]);
 
-    render(<PromiseDetail promiseId="prm_002" />);
+    renderWithRouter('prm_002');
 
     await waitFor(() => {
       expect(
@@ -90,7 +101,7 @@ describe('PromiseDetail', () => {
     getPromises.mockResolvedValue([mockPendingPromise]);
     getAssessments.mockResolvedValue([]);
 
-    render(<PromiseDetail promiseId="prm_001" />);
+    renderWithRouter('prm_001');
 
     await waitFor(() => {
       expect(
@@ -103,7 +114,7 @@ describe('PromiseDetail', () => {
     getPromises.mockResolvedValue([mockPendingPromise]);
     getAssessments.mockResolvedValue([mockAssessment]);
 
-    render(<PromiseDetail promiseId="prm_001" />);
+    renderWithRouter('prm_001');
 
     await waitFor(() => {
       expect(screen.getByText('dev_user_001')).toBeInTheDocument();
@@ -112,11 +123,11 @@ describe('PromiseDetail', () => {
     expect(screen.getByText('Apr 5, 2026')).toBeInTheDocument();
   });
 
-  test('renders not found state when promiseId does not match any promise', async () => {
+  test('renders not found state when id does not match any promise', async () => {
     getPromises.mockResolvedValue([mockPendingPromise]);
     getAssessments.mockResolvedValue([]);
 
-    render(<PromiseDetail promiseId="prm_999" />);
+    renderWithRouter('prm_999');
 
     await waitFor(() => {
       expect(screen.getByText('Promise not found.')).toBeInTheDocument();
@@ -127,7 +138,7 @@ describe('PromiseDetail', () => {
     getPromises.mockRejectedValue(new Error('Network error'));
     getAssessments.mockRejectedValue(new Error('Network error'));
 
-    render(<PromiseDetail promiseId="prm_001" />);
+    renderWithRouter('prm_001');
 
     await waitFor(() => {
       expect(
@@ -140,7 +151,7 @@ describe('PromiseDetail', () => {
     getPromises.mockResolvedValue([mockPendingPromise]);
     getAssessments.mockResolvedValue([]);
 
-    render(<PromiseDetail promiseId="prm_001" />);
+    renderWithRouter('prm_001');
 
     await waitFor(() => {
       expect(screen.getByText('← Back to Promises')).toBeInTheDocument();
